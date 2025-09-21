@@ -1,0 +1,28 @@
+# ベースとなるOSイメージを指定
+FROM ruby:3.2.2
+
+# タイムゾーンや文字コード、開発モードなどの環境変数を設定
+ENV LANG C.UTF-8
+ENV TZ Asia/Tokyo
+ENV RAILS_ENV=development
+
+# 必要なシステムライブラリをインストール
+# postgresql-client: RailsからPostgreSQLに接続するために必要
+# vim, nano: コンテナ内でファイルを編集するためのエディタ
+RUN apt-get update -qq && apt-get install -y \
+  ca-certificates curl gnupg postgresql-client vim nano
+
+# コンテナ内の作業ディレクトリを指定
+WORKDIR /app
+
+# Gemfileを先にコピーし、bundle installを実行
+# この2行を先に実行することで、Gemfileに変更がない限りキャッシュが利用され、ビルドが高速化します
+COPY Gemfile Gemfile.lock ./
+RUN gem install bundler && bundle install
+
+# プロジェクトの全ファイルをコンテナ内にコピー
+COPY . .
+
+# コンテナ起動時に実行されるデフォルトのコマンド
+# bin/devはRails 7から導入された仕組みで、RailsサーバーとCSSのビルドなどを同時に実行します
+CMD ["bin/dev"]
