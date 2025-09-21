@@ -1,0 +1,39 @@
+services:
+  # データベースサービス (PostgreSQL)
+  db:
+    image: postgres:15
+    platform: linux/amd64
+    environment:
+      TZ: Asia/Tokyo
+      POSTGRES_PASSWORD: password
+    volumes:
+      # DBのデータをPC側に永続化し、コンテナを消してもデータが消えないようにする
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      # PCの5432番ポートをコンテナの5432番ポートに接続
+      - "5432:5432"
+
+  # Railsアプリケーションサービス
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    # コンテナ内でPryなどのデバッガを対話的に使うために必要
+    tty: true
+    stdin_open: true
+    volumes:
+      # PCの現在いるフォルダをコンテナの/appに同期させる (コードの変更が即時反映される)
+      - .:/app
+      # GemをPC側にキャッシュし、ビルドを高速化する
+      - bundle_data:/usr/local/bundle:cached
+    ports:
+      # PCの3000番ポートをコンテナの3000番ポートに接続
+      - "3000:3000"
+    # dbサービスが起動してからappサービスを起動する
+    depends_on:
+      - db
+
+# volumesで定義した名前付きボリュームをDockerに作成させる
+volumes:
+  postgres_data:
+  bundle_data:
