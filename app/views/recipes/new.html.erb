@@ -1,0 +1,14 @@
+<div class="container mx-auto px-4 py-8 max-w-2xl">
+  <h1 class="text-3xl font-bold text-center mb-6">AI献立サジェストアプリ</h1>
+
+  <%= form_with url: recipes_path, data: { turbo: false } do |form| %>
+    <div class="mb-4">
+      <%= form.label :ingredients, "冷蔵庫にある食材をカンマ区切りで入力してください", class: "block text-gray-700 text-sm font-bold mb-2" %>
+      <%= form.text_area :ingredients, class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline", rows: 3, placeholder: "例：豚肉, 玉ねぎ, 卵" %>
+    </div>
+
+    <div class="flex items-center justify-center">
+      <%= form.submit "レシピを提案してもらう", class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline cursor-pointer" %>
+    </div>
+  <% end %>
+</div>
