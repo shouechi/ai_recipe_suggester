@@ -1,14 +1,49 @@
 <div class="container mx-auto px-4 py-8 max-w-2xl">
   <h1 class="text-3xl font-bold text-center mb-6">AI献立サジェストアプリ</h1>
 
-  <%= form_with url: recipes_path, data: { turbo: false } do |form| %>
-    <div class="mb-4">
-      <%= form.label :ingredients, "冷蔵庫にある食材をカンマ区切りで入力してください", class: "block text-gray-700 text-sm font-bold mb-2" %>
-      <%= form.text_area :ingredients, class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline", rows: 3, placeholder: "例：豚肉, 玉ねぎ, 卵" %>
+  <%# "recipe_form"というIDでTurbo Frameを設置 %>
+  <%= turbo_frame_tag "recipe_form" do %>
+    <%= form_with url: recipes_path, method: :post do |form| %>
+      <div class="mb-4">
+        <%= form.label :ingredients, "冷蔵庫にある食材をカンマ区切りで入力してください", class: "block text-gray-700 text-sm font-bold mb-2" %>
+        <%= form.text_area :ingredients, value: params[:ingredients], class: "shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline", rows: 3, placeholder: "例：豚肉, 玉ねぎ, 卵" %>
+      </div>
+
+      <div class="flex items-center justify-center">
+        <%= form.submit "レシピを提案してもらう", id: "recipe-submit-button", class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline cursor-pointer" %>
+      </div>
+    <% end %>
+
+    <% if @error_message %>
+      <div class="mt-4 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
+        <strong class="font-bold">エラー:</strong>
+        <span class="block sm:inline"><%= @error_message %></span>
+      </div>
+    <% end %>
+
+    <div id="loading-indicator" class="hidden text-center mt-4">
+      <p class="text-gray-600">AIがレシピを考えています...</p>
     </div>
 
-    <div class="flex items-center justify-center">
-      <%= form.submit "レシピを提案してもらう", class: "bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline cursor-pointer" %>
-    </div>
+    <% if @recipe %>
+      <div class="mt-8 bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+        <h2 class="text-2xl font-bold mb-2"><%= @recipe['recipeName'] %></h2>
+        <p class="text-gray-700 mb-4"><%= @recipe['description'] %></p>
+
+        <h3 class="text-xl font-semibold mb-2">材料</h3>
+        <ul class="list-disc list-inside mb-4">
+          <% @recipe['ingredients'].each do |ingredient| %>
+            <li><%= ingredient['name'] %> - <%= ingredient['quantity'] %></li>
+          <% end %>
+        </ul>
+
+        <h3 class="text-xl font-semibold mb-2">手順</h3>
+        <ol class="list-decimal list-inside">
+          <% @recipe['instructions'].each do |instruction| %>
+            <li><%= instruction %></li>
+          <% end %>
+        </ol>
+      </div>
+    <% end %>
   <% end %>
 </div>
